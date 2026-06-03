@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Usuario – La Trocha</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS  — 1:1 from Figma node 62:103  (390 × 933 px)
+    ============================================================ */
+    :root {
+      /* Colours */
+      --clr-bg:           #fefaf1;
+      --clr-accent:       #ffbf00;
+      --clr-dark:         #2f211d;
+      --clr-input-bg:     #ebe0c9;
+      --clr-placeholder:  #b1ab9e;
+      --clr-white:        #ffffff;
+
+      /* Typography */
+      --fs-10: 10px;
+      --fs-14: 14px;
+      --fs-20: 20px;
+      --fw-reg:  400;
+      --fw-bold: 700;
+      --lh-norm: normal;
+      --lh-17:   17px;
+
+      /* Layout */
+      --page-w:     390px;
+      --page-pad-x: 32px;
+
+      /* Component sizes */
+      --avatar-size:   76.677px;
+      --input-h:       38px;
+      --input-w:       327px;
+      --input-r:       150px;
+      --save-btn-h:    35px;
+      --save-btn-w:    217px;
+
+      /* Nav */
+      --nav-outer-h:  118px;
+      --nav-pill-h:    44px;
+      --nav-pill-w:   261px;
+      --nav-search-w:  50px;
+      --nav-active-w:  45.78px;
+      --nav-active-h:  40.7px;
+      --nav-r:         43px;
+    }
+
+    /* ============================================================
+       RESET
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      background: var(--clr-bg);
+      font-family: 'Poppins', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      color: var(--clr-dark);
+    }
+
+    img    { display: block; }
+    a      { cursor: pointer; text-decoration: none; color: inherit; }
+    button { cursor: pointer; border: none; background: none; font-family: inherit; color: inherit; }
+
+    /* ============================================================
+       PAGE SHELL
+       Canvas 390 × 933. Bottom nav is sticky so we add padding.
+    ============================================================ */
+    .page {
+      position: relative;
+      max-width: var(--page-w);
+      margin: 0 auto;
+      background: var(--clr-bg);
+      overflow-x: hidden;
+      /* last element (save btn top≈686 + 35h) + 22gap + 118nav ≈ 861 → some breathing room */
+      padding-bottom: 150px;
+      min-height: 100svh;
+    }
+
+    /* ============================================================
+       HERO GRADIENT  (0 → 184px)
+       #ffbf00 at 22.022%  →  #fefaf1 at 79.608%
+    ============================================================ */
+    .hero-gradient {
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 184px;
+      background: linear-gradient(
+        to bottom,
+        #ffbf00 22.022%,
+        #fefaf1 79.608%
+      );
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       PROFILE SECTION  (avatar + username)
+       Avatar:   left=157  top=60  w=h=76.677
+       Edit btn: left=176.17  top=76.61  w=39.616  h=43.45
+       Username: centered  top=145  14px Regular  #2f211d
+    ============================================================ */
+    .profile {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      /* top of avatar in Figma = 60px */
+      padding-top: 60px;
+    }
+
+    .profile__avatar-wrap {
+      position: relative;
+      width:  var(--avatar-size);
+      height: var(--avatar-size);
+    }
+
+    .profile__avatar {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    /* Edit / camera button  — overlaid on avatar
+       In Figma: left=176.17 top=76.61  (within page)
+       Relative to avatar (left=157): offsetX = 176.17-157 = 19.17
+                                       offsetY = 76.61-60   = 16.61
+    */
+    .profile__edit-btn {
+      position: absolute;
+      bottom: -6px;
+      right: -4px;
+      width:  39.616px;
+      height: 43.45px;
+      background: none;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .profile__edit-btn img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* Username  top=145  → margin-top = 145-(60+76.677) = ~8px */
+    .profile__username {
+      margin-top: 8px;
+      font-size: var(--fs-14);
+      font-weight: var(--fw-reg);
+      color: var(--clr-dark);
+      line-height: var(--lh-norm);
+      text-align: center;
+    }
+
+    /* ============================================================
+       FORM SECTION
+       "Información personal" heading: top=202  left=32  14px Regular
+    ============================================================ */
+    .form-section {
+      position: relative;
+      z-index: 10;
+      /* top=202 → from page top; avatar block ends at ~153px (60+77+8+15=160), margin=42 */
+      margin-top: 42px;
+      padding: 0 var(--page-pad-x);
+    }
+
+    .form-section__heading {
+      font-size: var(--fs-14);
+      font-weight: var(--fw-reg);
+      color: var(--clr-dark);
+      line-height: var(--lh-norm);
+      margin-bottom: 56px;    /* 273(first label top) - 202(heading top) - 15(heading h) = 56 */
+    }
+
+    /* ============================================================
+       FORM FIELDS
+       Label top offsets from Figma (from page top):
+         Nombre:   273  Input: 294  → gap label-to-input = 21
+         Correo:   374  Input: 395
+         Contacto: 475  Input: 496
+         Dirección:576  Input: 597
+         Gap between fields: 374-294-38 = 42px
+       Each field block = label(10px) + gap(21px) + input(38px) = 69px
+       Gap between blocks = 42px
+    ============================================================ */
+    .form {
+      display: flex;
+      flex-direction: column;
+      gap: 42px;
+    }
+
+    .form__field {
+      display: flex;
+      flex-direction: column;
+      gap: 21px;
+    }
+
+    .form__label {
+      font-size: var(--fs-10);
+      font-weight: var(--fw-reg);
+      color: var(--clr-dark);
+      line-height: var(--lh-norm);
+    }
+
+    /* Input  w=327  h=38  r=150px  bg=#ebe0c9
+       Figma center-aligns horizontally: left = (390-327)/2 = 31.5 ≈ 32 */
+    .form__input {
+      width: var(--input-w);
+      max-width: 100%;
+      height: var(--input-h);
+      background: var(--clr-input-bg);
+      border-radius: var(--input-r);
+      border: none;
+      outline: none;
+      padding: 0 17px;    /* from Figma: text left=49, input left≈31 → padding=18 */
+      font-family: 'Poppins', sans-serif;
+      font-size: var(--fs-14);
+      font-weight: var(--fw-reg);
+      color: var(--clr-dark);
+      line-height: var(--lh-norm);
+      caret-color: var(--clr-dark);
+      transition: background 0.15s;
+    }
+
+    .form__input::placeholder {
+      color: var(--clr-placeholder);
+    }
+
+    .form__input:focus {
+      background: #e0d5be;
+    }
+
+    /* ============================================================
+       "GUARDAR DATOS" BUTTON
+       Figma: centered  top=686  w=217  h=35  r=150px  bg=#2f211d
+       Text: 20px Bold  #fefaf1  lh=17px  centered
+    ============================================================ */
+    .save-btn-wrap {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      justify-content: center;
+      /* top=686 → from form-section top≈202: 686-202=484 internal, but easier to compute:
+         last input bottom = 597+38=635  →  margin = 686-635=51 */
+      margin-top: 51px;
+    }
+
+    .save-btn {
+      width:  var(--save-btn-w);
+      height: var(--save-btn-h);
+      background: var(--clr-dark);
+      border-radius: 150px;
+      border: none;
+      cursor: pointer;
+      font-family: 'Poppins', sans-serif;
+      font-size: var(--fs-20);
+      font-weight: var(--fw-bold);
+      color: var(--clr-bg);
+      line-height: var(--lh-17);
+      text-align: center;
+      letter-spacing: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s, transform 0.1s;
+    }
+
+    .save-btn:hover  { opacity: 0.88; }
+    .save-btn:active { transform: scale(0.97); }
+
+    /* ============================================================
+       STICKY BOTTOM NAVIGATION
+       Figma: top=755  h=118  w=390  r=20
+       Main pill: left=33  top=771  w=261  h=44  r=43  bg=#ffbf00
+       Search:    left=308 top=771  w=50   h=44  r=43  bg=#ffbf00
+       Active (Menú/User): left=225 top=773  w=45.78  h=40.7  bg=#2f211d
+       Icon order inside pill: Home · Categorías · Cart · Menú(active)
+    ============================================================ */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: var(--page-w);
+      height: var(--nav-outer-h);
+      background: var(--clr-bg);
+      border-radius: 20px 20px 0 0;
+      box-shadow: 0 -3px 20px rgba(0,0,0,0.07);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      padding: 0 33px;
+      gap: 13px;
+    }
+
+    .bottom-nav__main {
+      flex: 1;
+      height: var(--nav-pill-h);
+      background: var(--clr-accent);
+      border-radius: var(--nav-r);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 6px;
+    }
+
+    .bottom-nav__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: var(--nav-r);
+      cursor: pointer;
+      transition: opacity 0.15s;
+      text-decoration: none;
+    }
+    .bottom-nav__icon:hover { opacity: 0.7; }
+    .bottom-nav__icon img   { width: 24px; height: auto; object-fit: contain; }
+
+    /* Active state — dark oval  (Menú / User icon active here) */
+    .bottom-nav__icon--active {
+      background: var(--clr-dark);
+      width:  var(--nav-active-w);
+      height: var(--nav-active-h);
+    }
+    .bottom-nav__icon--active img { width: 26px; }
+
+    .bottom-nav__search {
+      flex-shrink: 0;
+      width:  var(--nav-search-w);
+      height: var(--nav-pill-h);
+      background: var(--clr-accent);
+      border-radius: var(--nav-r);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .bottom-nav__search:hover { opacity: 0.8; }
+    .bottom-nav__search img   { width: 22px; height: 22px; object-fit: contain; }
+
+    /* ============================================================
+       RESPONSIVE — TABLET  (≤ 1024px)
+    ============================================================ */
+    @media (max-width: 1024px) {
+      .page, .bottom-nav { max-width: 100%; }
+      .form__input { width: 100%; }
+    }
+
+    /* ============================================================
+       RESPONSIVE — MOBILE  (≤ 768px)
+    ============================================================ */
+    @media (max-width: 768px) {
+      :root {
+        --page-pad-x: 20px;
+        --save-btn-w: 190px;
+        --fs-20: 18px;
+      }
+      .form__input { width: 100%; }
+      .form-section__heading { margin-bottom: 32px; }
+      .form { gap: 32px; }
+      .form__field { gap: 14px; }
+      .save-btn-wrap { margin-top: 40px; }
+    }
+
+    @media (max-width: 420px) {
+      :root { --page-pad-x: 16px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ══════════════════════════════════
+       BACKGROUND GRADIENT
+  ══════════════════════════════════ -->
+  <div class="hero-gradient" aria-hidden="true"></div>
+
+  <!-- ══════════════════════════════════
+       HEADER: AVATAR + USERNAME
+       Figma: avatar left=157 top=60  w/h=76.677
+              edit btn overlay: left=176.17 top=76.61  w=39.616 h=43.45
+              username: centered top=145  14px Regular
+  ══════════════════════════════════ -->
+  <header>
+    <div class="profile">
+      <div class="profile__avatar-wrap">
+        <!-- Avatar circle (Ellipse 1) -->
+        <img
+          class="profile__avatar"
+          src="Imagenes/JohnDoeIcono.svg"
+          alt="Foto de perfil del usuario"
+        />
+        </button>
+      </div>
+
+      <p class="profile__username">@Joh_Doe_2026</p>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════
+       MAIN: PERSONAL INFO FORM
+  ══════════════════════════════════ -->
+  <main>
+    <section class="form-section" aria-labelledby="form-heading">
+
+      <h2 class="form-section__heading" id="form-heading">
+        Información personal
+      </h2>
+
+      <form class="form" novalidate>
+
+        <!-- Nombre completo  label top=273  input top=294 -->
+        <div class="form__field">
+          <label class="form__label" for="nombre">Nombre completo</label>
+          <input
+            class="form__input"
+            id="nombre"
+            type="text"
+            name="nombre"
+            placeholder="Escriba aquí"
+            autocomplete="name"
+            aria-label="Nombre completo"
+          />
+        </div>
+
+        <!-- Correo electrónico  label top=374  input top=395 -->
+        <div class="form__field">
+          <label class="form__label" for="correo">Correo electrónico</label>
+          <input
+            class="form__input"
+            id="correo"
+            type="email"
+            name="correo"
+            placeholder="Escriba aquí"
+            autocomplete="email"
+            aria-label="Correo electrónico"
+          />
+        </div>
+
+        <!-- Número de contacto  label top=475  input top=496 -->
+        <div class="form__field">
+          <label class="form__label" for="telefono">Número de contacto</label>
+          <input
+            class="form__input"
+            id="telefono"
+            type="tel"
+            name="telefono"
+            placeholder="Escriba aquí"
+            autocomplete="tel"
+            aria-label="Número de contacto"
+          />
+        </div>
+
+        <!-- Dirección  label top=576  input top=597 -->
+        <div class="form__field">
+          <label class="form__label" for="direccion">Dirección</label>
+          <input
+            class="form__input"
+            id="direccion"
+            type="text"
+            name="direccion"
+            placeholder="Escriba aquí"
+            autocomplete="street-address"
+            aria-label="Dirección"
+          />
+        </div>
+
+      </form>
+    </section>
+
+    <!-- SAVE BUTTON  top=686  centered  w=217  h=35 -->
+    <div class="save-btn-wrap">
+      <button class="save-btn" type="submit" form="" aria-label="Guardar datos del perfil">
+        Guardar datos
+      </button>
+    </div>
+  </main>
+
+  <!-- ══════════════════════════════════
+       STICKY BOTTOM NAVIGATION
+       Icon order: Home · Categorías · Cart · Menú(ACTIVE)
+       Figma: Menú active bg left=225 top=773 dark oval
+  ══════════════════════════════════ -->
+  <nav class="bottom-nav" aria-label="Navegación principal">
+
+    <!-- Main yellow pill -->
+    <div class="bottom-nav__main" role="list">
+
+      <!-- Home -->
+      <a
+        class="bottom-nav__icon"
+        href="Home.html"
+        role="listitem"
+        aria-label="Inicio"
+      >
+        <img
+          src="Imagenes/HomeIcono.svg"
+          alt="Inicio"
+        />
+      </a>
+
+      <!-- Categorías -->
+      <a
+        class="bottom-nav__icon"
+        href="categorias.html"
+        role="listitem"
+        aria-label="Categorías"
+      >
+        <img
+          src="Imagenes/CatalogoIcono.svg"
+          alt="Categorías"
+        />
+      </a>
+
+      <!-- Cart -->
+      <a
+        class="bottom-nav__icon"
+        href="carrito.html"
+        role="listitem"
+        aria-label="Carrito de compras"
+      >
+        <img
+          src="Imagenes/CarritoIcono.svg"
+          alt="Carrito"
+        />
+      </a>
+
+      <!-- Menú / Usuario — ACTIVE (dark oval, left=225 in Figma) -->
+      <button
+        class="bottom-nav__icon bottom-nav__icon--active"
+        role="listitem"
+        aria-label="Usuario"
+        aria-current="page"
+      >
+        <img
+          src="Imagenes/UsuarioIconoAmarillo.svg"
+          alt="Usuario"
+        />
+      </button>
+
+    </div><!-- /.bottom-nav__main -->
+
+    <!-- Search pill -->
+    <button class="bottom-nav__search" aria-label="Buscar">
+      <img
+        src="Imagenes/BuscarIcono.svg"
+        alt="Buscar"
+      />
+    </button>
+
+  </nav><!-- /.bottom-nav -->
+
+</div><!-- /.page -->
+
+<!-- ============================================================
+     JAVASCRIPT — form validation + save feedback
+============================================================ -->
+<script>
+  /* ── "Guardar datos" feedback ── */
+  const saveBtn = document.querySelector('.save-btn');
+
+  saveBtn.addEventListener('click', () => {
+    const inputs = document.querySelectorAll('.form__input');
+    let allFilled = true;
+
+    inputs.forEach(input => {
+      if (!input.value.trim()) {
+        allFilled = false;
+        input.style.outline = '2px solid #e05c2c';
+        input.addEventListener('input', () => {
+          input.style.outline = '';
+        }, { once: true });
+      }
+    });
+
+    if (!allFilled) return;
+
+    const original = saveBtn.textContent;
+    saveBtn.textContent = '✓ Guardado';
+    saveBtn.style.background = '#3a7d44';
+    saveBtn.disabled = true;
+
+    setTimeout(() => {
+      saveBtn.textContent = original;
+      saveBtn.style.background = '';
+      saveBtn.disabled = false;
+    }, 2200);
+  });
+
+  /* ── Profile photo change (edit button) ── */
+  const editBtn = document.querySelector('.profile__edit-btn');
+  const avatarImg = document.querySelector('.profile__avatar');
+
+  editBtn.addEventListener('click', () => {
+    const picker = document.createElement('input');
+    picker.type = 'file';
+    picker.accept = 'image/*';
+    picker.addEventListener('change', () => {
+      if (picker.files && picker.files[0]) {
+        const url = URL.createObjectURL(picker.files[0]);
+        avatarImg.src = url;
+      }
+    });
+    picker.click();
+  });
+</script>
+
+</body>
+</html>

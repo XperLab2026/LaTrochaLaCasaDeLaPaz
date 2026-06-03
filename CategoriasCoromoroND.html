@@ -1,0 +1,520 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Churuka – Detalles</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ─── Design Tokens ──────────────────────────────────────────── */
+    :root {
+      --color-bg:          #fefaf1;
+      --color-brand:       #ffbf00;
+      --color-dark:        #2f211d;
+      --color-white:       #ffffff;
+
+      --font-family:       'Poppins', sans-serif;
+      --fs-10:             10px;
+      --fs-14:             14px;
+      --fs-20:             20px;
+
+      --fw-regular:        400;
+      --fw-bold:           700;
+
+      --lh-normal:         normal;
+      --lh-17:             17px;
+
+      --radius-pill:       150px;
+      --radius-card:       20px;
+      --radius-btn:        43px;
+
+      --page-w:            390px;
+      --page-pad-x:        34px;
+    }
+
+    /* ─── Reset ──────────────────────────────────────────────────── */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-family);
+      background: #e5e5e5;
+      min-height: 100vh;
+      width: 100%;
+      overflow-x: hidden;
+    }
+
+    /* ─── Page Shell ─────────────────────────────────────────────── */
+    .page {
+      position: relative;
+      width: 100%;
+      min-height: 100vh;  
+      background-color: var(--color-bg);
+      overflow-x: hidden;
+      padding-bottom: 140px;
+    }
+
+    /* ─── Header gradient band ───────────────────────────────────── */
+    .page__gradient-band {
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 184px;
+      background: linear-gradient(180deg, #ffbf00 22.022%, #fefaf1 79.608%);
+      z-index: 0;
+    }
+
+    /* ─── Top nav bar ────────────────────────────────────────────── */
+    .topbar {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 48px var(--page-pad-x) 0;
+      height: 84px;
+    }
+
+    .topbar__back {
+      position: absolute;
+      left: var(--page-pad-x);
+      top: 48px;
+      width: 26px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: none;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+    }
+    .topbar__back svg { width: 26px; height: 24px; }
+
+    .topbar__title {
+      font-size: var(--fs-20);
+      font-weight: var(--fw-bold);
+      line-height: var(--lh-17);
+      color: var(--color-dark);
+      text-align: center;
+      letter-spacing: 0;
+    }
+
+    /* ─── Hero image area ────────────────────────────────────────── */
+    .hero {
+      position: relative;
+      margin: 6px var(--page-pad-x) 0;
+      width: auto;
+      height: 468px;
+      border-radius: 16px;
+      overflow: hidden;
+    }
+
+    .hero__img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    
+    }
+
+    /* ─── Product info ───────────────────────────────────────────── */
+    .product {
+      position: relative;
+      z-index: 2;
+      padding: 0 var(--page-pad-x);
+      margin-top: 22px;
+    }
+
+    .product__subtitle {
+      font-size: var(--fs-14);
+      font-weight: var(--fw-regular);
+      line-height: var(--lh-normal);
+      color: var(--color-dark);
+    }
+
+    .product__price {
+      font-size: 14px;
+      font-weight: 700;
+      margin-top: 6px;
+      color: #2f211d;
+}
+
+    /* ─── Tag pills (pack options) ───────────────────────────────── */
+    .tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .tag {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      height: 19px;
+      padding: 0 10px;
+      background: var(--color-brand);
+      border-radius: var(--radius-pill);
+      font-size: var(--fs-10);
+      font-weight: var(--fw-regular);
+      color: var(--color-dark);
+      white-space: nowrap;
+      border: none;
+      cursor: pointer;
+      font-family: var(--font-family);
+    }
+    .tag:hover { opacity: 0.85; }
+
+    /* ─── Información accordion ──────────────────────────────────── */
+    .info {
+      padding: 0 var(--page-pad-x);
+      margin-top: 30px;
+    }
+
+    .info__header {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      cursor: pointer;
+      background: none;
+      border: none;
+      padding: 0;
+      font-family: var(--font-family);
+    }
+
+    .info__label {
+      font-size: var(--fs-14);
+      font-weight: var(--fw-regular);
+      color: var(--color-dark);
+      line-height: var(--lh-normal);
+    }
+
+    .info__chevron {
+      width: 14px;
+      height: 8px;
+      transition: transform 0.2s ease;
+    }
+    .info__header[aria-expanded="true"] .info__chevron {
+      transform: rotate(180deg);
+    }
+
+    .info__body {
+      margin-top: 8px;
+      width: 100%;
+      max-width: 100%;
+      overflow: hidden;
+      max-height: 200px;
+      transition: max-height 0.25s ease;
+    }
+    .info__body.is-collapsed {
+      max-height: 0;
+    }
+
+    .info__text {
+      font-size: var(--fs-10);
+      font-weight: var(--fw-regular);
+      line-height: var(--lh-normal);
+      color: var(--color-dark);
+    }
+    .info__text p + p { margin-top: 8px; }
+
+    .product,
+    .info {
+      padding: 0 var(--page-pad-x);
+    }
+    
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      width: 100%;
+      max-width: var(--page-w);
+      height: 118px;
+      background: #fefaf1;
+      border-radius: var(--r-card) var(--r-card) 0 0;
+      box-shadow: 0 -3px 20px rgba(0,0,0,0.07);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 12px;
+    }
+
+.bottom-nav__main {
+  flex: 1;
+  height: 44px;
+  background: #ffbf00;
+  border-radius: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 0 6px;
+}
+
+.bottom-nav__icon {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 43px;
+}
+
+.bottom-nav__icon img {
+  width: 24px;
+  height: auto;
+  object-fit: contain;
+}
+
+.bottom-nav__icon--active {
+  background: #2f211d;
+  width: 45.78px;
+  height: 40.7px;
+}
+
+.bottom-nav__icon--active img {
+  width: 26px;
+}
+
+.bottom-nav__search {
+  flex-shrink: 0;
+  width: 50px;
+  height: 44px;
+  background: #ffbf00;
+  border-radius: 43px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+.bottom-nav__search img {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+}
+
+
+    /* ─── Tablet / Mobile – stretch to full width ─────────────────── */
+    @media screen and (max-width: 430px) {
+
+  .page {
+    width: 100%;
+  }
+
+  .hero {
+    width: calc(100% - 40px);
+    margin: 12px 20px 0;
+    height: 420px;
+  }
+
+  .product,
+  .info,
+  .topbar {
+    padding-left: 20px;
+    padding-right: 20px;
+  }
+
+  .topbar__back {
+    left: 20px;
+  }
+
+  .bottom-nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+  }
+}
+  </style>
+</head>
+<body>
+
+<main class="page" role="main">
+
+  <!-- Gradient background band -->
+  <div class="page__gradient-band" aria-hidden="true"></div>
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <a href="categorias.html" class="topbar__back" aria-label="Volver atrás">
+      <!-- Back arrow icon -->
+      <svg viewBox="0 0 26 24" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <circle cx="13" cy="12" r="12" fill="#2f211d" fill-opacity="0.12"/>
+        <path d="M15 7l-5 5 5 5" stroke="#2f211d" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </a>
+    <h1 class="topbar__title">DETALLES</h1>
+  </header>
+
+  <!-- Hero product image -->
+  <section class="hero" aria-label="Imagen del producto">
+    <img
+      class="hero__img"
+      src="Imagenes/CoromoroCategorias.jpg"
+      alt="Cerveza artesanal Coromoro La Trocha – botella 330ml"
+    />
+  </section>
+
+  <!-- Product details -->
+  <section class="product" aria-label="Información del producto">
+    <p class="product__subtitle">La Trocha</p>
+    <p class="product__price" id="price">No disponible</p>
+    <h2 class="product__title">Cerveza artesanal Coromoro</h2>
+
+    <!-- Pack selection tags -->
+    <div class="tags" role="group" aria-label="Seleccionar cantidad">
+      <button class="tag" data-price="nodisponible">1 Trocha</button>
+      <button class="tag" data-price="nodisponible">6 Trochas</button>
+      <button class="tag" data-price="nodisponible">12 Trochas</button>
+      <button class="tag" data-price="nodisponible">Caja x24</button>
+
+      
+    </div>
+  </section>
+
+  <!-- Información accordion -->
+  <section class="info" aria-label="Información adicional">
+    <button
+      class="info__header"
+      type="button"
+      aria-expanded="true"
+      aria-controls="info-body"
+      id="info-toggle"
+    >
+      <span class="info__label">Información</span>
+      <!-- Chevron down -->
+      <svg class="info__chevron" viewBox="0 0 14 8" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <path d="M1 1l6 6 6-6" stroke="#2f211d" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+    </button>
+
+    <div class="info__body" id="info-body" role="region" aria-labelledby="info-toggle">
+      <div class="info__text">
+        <p>Coromoro es una cerveza estilo Ale Porter ; oscura y de cuerpo fuerte. Su nombre es en homenaje a la primera guerrilla independentista liderada por Antonia Santos.</p>
+        <p>330ml - 5.5° de alcohol</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Bottom navigation bar -->
+  <nav class="bottom-nav" aria-label="Navegación principal">
+
+  <div class="bottom-nav__main" role="list">
+
+    <!-- Home -->
+    <a
+      class="bottom-nav__icon"
+      href="Home.html"
+      role="listitem"
+      aria-label="Inicio"
+    >
+      <img
+        src="Imagenes/HomeIcono.svg"
+        alt="Inicio"
+      />
+    </a>
+
+    <!-- Categorías activas -->
+    <button
+      class="bottom-nav__icon bottom-nav__icon--active"
+      role="listitem"
+      aria-label="Categorías"
+      aria-current="page"
+    >
+      <img
+        src="Imagenes/CatalogoIconoAmarillo.svg"
+        alt="Categorías"
+      />
+    </button>
+
+    <!-- Carrito -->
+    <a
+      class="bottom-nav__icon"
+      href="carrito.html"
+      role="listitem"
+      aria-label="Carrito de compras"
+    >
+      <img
+        src="Imagenes/CarritoIcono.svg"
+        alt="Carrito"
+      />
+    </a>
+
+    <!-- Usuario -->
+    <a
+      class="bottom-nav__icon"
+      href="usuario.html"
+      role="listitem"
+      aria-label="Menú"
+    >
+      <img
+        src="Imagenes/UsuarioIcono.svg"
+        alt="Menú"
+      />
+    </a>
+
+  </div>
+
+  <!-- Buscar -->
+  <button class="bottom-nav__search" aria-label="Buscar">
+    <img
+      src="Imagenes/BuscarIcono.svg"
+      alt="Buscar"
+    />
+  </button>
+
+</nav>
+
+</main>
+
+<script>
+  // Accordion toggle for Información section
+  const infoToggle = document.getElementById('info-toggle');
+  const infoBody   = document.getElementById('info-body');
+
+  infoToggle.addEventListener('click', () => {
+    const isExpanded = infoToggle.getAttribute('aria-expanded') === 'true';
+    infoToggle.setAttribute('aria-expanded', String(!isExpanded));
+    infoBody.classList.toggle('is-collapsed', isExpanded);
+  });
+
+  // Pack tag selection: highlight active tag
+  document.querySelectorAll('.tag').forEach(tag => {
+    tag.addEventListener('click', () => {
+      document.querySelectorAll('.tag').forEach(t => t.style.opacity = '1');
+      tag.style.boxShadow = '0 0 0 2px #2f211d';
+    });
+  });
+
+  const priceEl = document.getElementById('price');
+
+document.querySelectorAll('.tag').forEach(tag => {
+  tag.addEventListener('click', () => {
+
+    // quita resaltado a todos
+    document.querySelectorAll('.tag').forEach(t => {
+      t.style.boxShadow = 'none';
+    });
+
+    // marca el seleccionado
+    tag.style.boxShadow = '0 0 0 2px #2f211d';
+
+    // cambia el precio
+const price = tag.getAttribute('data-price');
+
+// Si no está disponible
+if (price === 'nodisponible') {
+  priceEl.textContent = 'No disponible';
+} else {
+  priceEl.textContent = `$ ${Number(price).toLocaleString('es-CO')}`;
+}
+  });
+});
+</script>
+</body>
+</html>

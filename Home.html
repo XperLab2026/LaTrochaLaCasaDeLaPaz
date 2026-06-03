@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>La Casa de Todos y Todas</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet" />
+  <style>
+    /* ===========================
+       DESIGN TOKENS
+    =========================== */
+    :root {
+      /* Colors */
+      --color-bg: #fefaf1;
+      --color-accent: #ffbf00;
+      --color-text-dark: #2f211d;;
+      --color-black: #000000;
+
+      /* Font sizes */
+      --fs-xs: 10px;
+      --fs-sm: 14px;
+      --fs-md: 20px;
+
+      /* Font weights */
+      --fw-regular: 400;
+      --fw-bold: 700;
+
+      /* Line heights */
+      --lh-normal: normal;
+      --lh-sm: 17px;
+
+      /* Border radii */
+      --radius-pill: 150px;
+      --radius-card: 20px;
+      --radius-btn: 43px;
+
+      /* Spacing */
+      --page-padding: 31px;
+      --page-width: 390px;
+    }
+
+    /* ===========================
+       RESET & BASE
+    =========================== */
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    html, body {
+      background-color: var(--color-bg);
+      font-family: 'Poppins', sans-serif;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img {
+      display: block;
+    }
+
+    a {
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    /* ===========================
+       PAGE WRAPPER
+    =========================== */
+    .page {
+      max-width: var(--page-width);
+      margin: 0 auto;
+      background-color: var(--color-bg);
+      position: relative;
+      overflow: hidden;
+      min-height: 100vh;
+      padding-bottom: 100px;
+    }
+
+    /* ===========================
+       HERO GRADIENT HEADER
+    =========================== */
+    .hero-gradient {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 184px;
+      background: linear-gradient(
+        to bottom,
+        var(--color-accent) 22.022%,
+        var(--color-bg) 79.608%
+      );
+      z-index: 0;
+    }
+
+    /* ===========================
+       TOP BAR (Search + Location)
+    =========================== */
+    .topbar {
+      position: relative;
+      z-index: 10;
+      padding-top: 45px;
+      padding-left: var(--page-padding);
+      padding-right: var(--page-padding);
+    }
+
+    .topbar__search {
+      background-color: var(--color-bg);
+      border-radius: var(--radius-pill);
+      height: 21px;
+      width: 327px;
+      position: relative;
+      display: flex;
+      align-items: center;
+      padding: 0 10px;
+    }
+
+    .topbar__search-icon {
+      position: absolute;
+      right: 10px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 14px;
+      height: 14px;
+    }
+
+    .topbar__location {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 12px;
+    }
+
+    .topbar__location-icon {
+      width: 8px;
+      height: 12px;
+      flex-shrink: 0;
+    }
+
+    .topbar__location-text {
+      font-family: 'Poppins', sans-serif;
+      font-size: var(--fs-xs);
+      font-weight: var(--fw-regular);
+      color: var(--color-text-dark);
+      line-height: var(--lh-normal);
+    }
+
+    /* ===========================
+       HERO CARD
+    =========================== */
+    .hero-card {
+      position: relative;
+      margin: 16px var(--page-padding) 0;
+      border-radius: var(--radius-card);
+      overflow: hidden;
+      height: 168px;
+    }
+
+    .hero-card__img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .hero-card__overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        18.43deg,
+        rgba(0, 0, 0, 1) 10.108%,
+        rgba(102, 102, 102, 0) 78.099%
+      );
+    }
+
+    .hero-card__label {
+      position: absolute;
+      bottom: 14px;
+      left: 19px;
+      font-family: 'Poppins', sans-serif;
+      font-size: var(--fs-sm);
+      font-weight: var(--fw-bold);
+      color:#fefaf1 !important;
+      line-height: var(--lh-sm);
+      width: 115px;
+    }
+
+    /* ===========================
+       BEER CAROUSEL SECTION
+    =========================== */
+    .beers {
+      margin-top: 36px;
+      padding-left: var(--page-padding);
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+
+    .beers::-webkit-scrollbar {
+      display: none;
+    }
+
+    .beers__track {
+      display: flex;
+      gap: 26px;
+      width: max-content;
+      padding-right: var(--page-padding);
+    }
+
+    .beers__item {
+      width: 103px;
+      height: 150px;
+      border-radius: 16px;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .beers__item img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    /* ===========================
+       LA CASA DE LA PAZ SECTION
+    =========================== */
+    .gallery-section {
+      margin-top: 24px;
+      padding: 0 var(--page-padding);
+    }
+
+    .gallery-section__title {
+      font-family: 'Poppins', sans-serif;
+      font-size: var(--fs-md);
+      font-weight: var(--fw-bold);
+      color: var(--color-text-dark);
+      line-height: var(--lh-sm);
+      margin-bottom: 16px;
+    }
+
+    .gallery-section__grid {
+      display: grid;
+      grid-template-columns: 163px 1fr;
+      grid-template-rows: 122px 112px 143px;
+      gap: 10px;
+    }
+
+    .gallery-section__item {
+      border-radius: 14px;
+      overflow: hidden;
+    }
+
+    .gallery-section__item img {
+      border: radius 14px;
+      overflow: hidden;
+    }
+
+    .gallery-section__item--tall {
+       grid-row: 1 / 3;
+    }
+
+    /* ===========================
+       BOTTOM NAV (Menu)
+    =========================== */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: var(--page-w);
+      height: 118px;
+      background:#fefaf1;
+      border-radius: var(--r-card) var(--r-card) 0 0;
+      box-shadow: 0 -3px 20px rgba(0,0,0,0.07);
+      z-index: 9999;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 12px;
+    }
+
+    .bottom-nav__main {
+      background-color: var(--color-accent);
+      border-radius: var(--radius-btn);
+      height: 44px;
+      flex: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 12px;
+    }
+
+    .bottom-nav__icon-btn {
+      background: none;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 36px;
+      height: 36px;
+    }
+
+    .bottom-nav__icon-btn img {
+      width: 100%;
+      height: auto;
+    }
+
+    .bottom-nav__icon-btn--active img {
+      width: 40px;
+      height: 40px;
+    }
+
+    .bottom-nav__search {
+      background-color: var(--color-accent);
+      border-radius: var(--radius-btn);
+      height: 44px;
+      width: 50px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      border: none;
+      cursor: pointer;
+    }
+
+    .bottom-nav__search img {
+      width: 22px;
+      height: 22px;
+    }
+
+    /* ===========================
+       RESPONSIVE: TABLET
+    =========================== */
+    @media (max-width: 1024px) {
+      .page {
+        max-width: 100%;
+      }
+
+      .topbar__search {
+        width: 100%;
+        max-width: 327px;
+      }
+    }
+
+    /* ===========================
+       RESPONSIVE: MOBILE
+    =========================== */
+    @media (max-width: 768px) {
+      :root {
+        --page-width: 100%;
+        --page-padding: 20px;
+      }
+
+      .page {
+        max-width: 100%;
+      }
+
+      .topbar__search {
+        width: 100%;
+        max-width: 100%;
+      }
+
+      .gallery-section__grid {
+        grid-template-columns: 163px 1fr;
+        grid-template-rows: auto;
+      }
+
+      .gallery-section__item--tall {
+        grid-row: 1 / 3;
+      }
+
+      .beers__item {
+        width: 90px;
+        height: 130px;
+      }
+    }
+
+    @media (max-width: 400px) {
+      .gallery-section__grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- Hero background gradient -->
+  <div class="hero-gradient" aria-hidden="true"></div>
+
+  <!-- TOP BAR: Search + Location -->
+  <header class="topbar">
+    <div class="topbar__search" role="search" aria-label="Buscar">
+      <img
+        class="topbar__search-icon"
+        src="https://www.figma.com/api/mcp/asset/dc99bdd3-aa8c-42b6-82ee-6b7de3fd2750"
+        alt="Buscar"
+      />
+    </div>
+    <div class="topbar__location">
+      <img
+        class="topbar__location-icon"
+        src="https://www.figma.com/api/mcp/asset/f18921e6-8605-4e26-943c-1c9adbf4fac9"
+        alt="Ubicación"
+      />
+      <span class="topbar__location-text">Kr 13 # 36-37</span>
+    </div>
+  </header>
+
+  <!-- HERO CARD: La Casa de Todos y Todas -->
+  <section aria-label="La Casa de Todos y Todas">
+    <div class="hero-card">
+      <img
+        class="hero-card__img"
+        src="https://www.figma.com/api/mcp/asset/b65501f8-1343-4100-9958-a62851c78059"
+        alt="La Casa de Todos y Todas - vista superior"
+      />
+      <div class="hero-card__overlay" aria-hidden="true"></div>
+      <p class="hero-card__label">LA CASA DE TODOS Y TODAS</p>
+    </div>
+  </section>
+
+  <!-- BEER CAROUSEL -->
+  <section class="beers" aria-label="Cervezas artesanales">
+    <div class="beers__track">
+      <div class="beers__item">
+        <img
+          src="Imagenes/CacaoteraHomeImagen.svg"
+          alt="Cerveza artesanal Cacaotera"
+        />
+      </div>
+      <div class="beers__item">
+        <img
+          src="Imagenes/ChurukaHomeImagen.svg"
+          alt="Cerveza artesanal Churuka"
+        />
+      </div>
+      <div class="beers__item">
+        <img
+          src="Imagenes/NieblaHomeImagen.svg"
+          alt="Cerveza artesanal Niebla"
+        />
+      </div>
+      <div class="beers__item">
+        <img
+          src="Imagenes/ChamiHomeImagen.svg"
+          alt="Cerveza artesanal Chami"
+        />
+      </div>
+      <div class="beers__item">
+        <img
+          src="Imagenes/AmazonaHomeImagen.svg"
+          alt="Cerveza artesanal Amazona"
+        />
+      </div>
+      <div class="beers__item">
+        <img
+          src="Imagenes/CoromoroHomeImagen.svg"
+          alt="Cerveza artesanal Coromoro"
+        />
+      </div>
+    </div>
+  </section>
+
+  <!-- GALLERY SECTION: La Casa de la Paz -->
+  <main class="gallery-section">
+    <h2 class="gallery-section__title">LA CASA DE LA PAZ</h2>
+    <div class="gallery-section__grid">
+      <!-- Top-left image -->
+      <div class="gallery-section__item" style="height:122px;">
+        <img
+          src="Imagenes/Imagen1HomeGaleria.svg"
+          alt="La Casa de la Paz - mural interior 1"
+        />
+      </div>
+      <!-- Right column tall image -->
+      <div class="gallery-section__item gallery-section__item--tall" style="height:248px;">
+        <img
+          src="Imagenes/Imagen3HomeGaleria.svg"
+          alt="La Casa de la Paz - pasillo con arte urbano"
+          style="height:100%;width:100%;object-fit:cover;"
+        />
+      </div>
+      <!-- Bottom-left row: two images stacked -->
+      <div class="gallery-section__item" style="height:112px;">
+        <img
+          src="Imagenes/Imagen2HomeGaleria.svg"
+          alt="La Casa de la Paz - ventanas con arte"
+        />
+      </div>
+    </div>
+
+    <!-- Extra gallery images below (bottom section) -->
+    <div style="display:grid;grid-template-columns:163px 1fr;gap:10px;margin-top:10px;">
+      <div class="gallery-section__item" style="height:248px;">
+        <img
+          src="Imagenes/Imagen6HomeGaleria.svg"
+          alt="La Casa de la Paz - mural con figura"
+        />
+      </div>
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <div class="gallery-section__item" style="height:119px;">
+          <img
+            src="Imagenes/Imagen4HomeGaleria.svg"
+            alt="La Casa de la Paz - galería de arte 1"
+          />
+        </div>
+        <div class="gallery-section__item" style="height:119px;">
+          <img
+            src="Imagenes/Imagen5HomeGaleria.svg"
+            alt="La Casa de la Paz - galería de arte 2"
+          />
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- BOTTOM NAVIGATION -->
+  <nav class="bottom-nav" aria-label="Navegación principal">
+
+    <!-- Main yellow pill (4 icons) -->
+    <div class="bottom-nav__main" role="list">
+
+      <!-- Home -->
+      <a
+        class="bottom-nav__icon"
+        href="#"
+        role="listitem"
+        aria-label="Inicio"
+      >
+        <img
+          src="Imagenes/HomeIconoCirculo.svg"
+          alt="Inicio"
+        />
+      </a>
+
+      <!-- Categorías (ACTIVE — dark pill) -->
+      <a
+        class="bottom-nav__icon"
+        href="categorias.html"
+        role="listitem"
+        aria-label="Categorías"
+
+      >
+        <img
+          src="Imagenes/CatalogoIcono.svg"
+          alt="Categorías"
+        />
+      </a>
+
+      <!-- Carrito -->
+      <a
+        class="bottom-nav__icon"
+        href="carrito.html"
+        role="listitem"
+        aria-label="Carrito de compras"
+      >
+        <img
+          src="Imagenes/CarritoIcono.svg"
+          alt="Carrito"
+        />
+      </a>
+
+      <!-- Menú / Hamburger -->
+      <a
+        class="bottom-nav__icon"
+        href="usuario.html"
+        role="listitem"
+        aria-label="Menú"
+      >
+        <img
+          src="Imagenes/UsuarioIcono.svg"
+          alt="Menú"
+        />
+      </a>
+
+    </div><!-- /.bottom-nav__main -->
+
+    <!-- Search pill -->
+    <button class="bottom-nav__search" aria-label="Buscar">
+      <img
+        src="Imagenes/BuscarIcono.svg"
+        alt="Buscar"
+      />
+    </button>
+
+  </nav><!-- /.bottom-nav -->
+</div>
+
+<script>
+  // Smooth horizontal scroll for beer carousel on wheel events
+  const beersEl = document.querySelector('.beers');
+  if (beersEl) {
+    beersEl.addEventListener('wheel', function(e) {
+      if (e.deltaY !== 0) {
+        e.preventDefault();
+        beersEl.scrollLeft += e.deltaY;
+      }
+    }, { passive: false });
+  }
+
+
+
+
+</script>
+</body>
+</html>

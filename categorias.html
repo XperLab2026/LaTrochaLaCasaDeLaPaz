@@ -1,0 +1,894 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Categorías – La Trocha</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS  — extracted from Figma
+    ============================================================ */
+    :root {
+      /* Colours */
+      --clr-bg:          #fefaf1;
+      --clr-accent:      #ffbf00;
+      --clr-accent-pale: #ffebb0;
+      --clr-dark:        #2f211d;
+      --clr-purple:      #8a38f5;
+      --clr-white:       #ffffff;
+
+      /* Typography */
+      --fs-8:  8px;
+      --fs-10: 10px;
+      --fw-reg:  400;
+      --fw-bold: 700;
+
+      /* Layout */
+      --page-w:      390px;
+      --page-pad-x:  31px;
+
+      /* Radii */
+      --r-pill:  150px;
+      --r-card:  20px;
+      --r-btn:   43px;
+
+      /* Component sizes */
+      --search-h:    21px;
+      --filter-h:    21px;
+      --mini-w:      64.6px;
+      --mini-h:      83.4px;
+      --card-img-h:  165px;
+      --heart-w:     21px;
+      --heart-h:     18px;
+      --cart-btn-h:  21px;
+      --cart-btn-w:  110px;
+      --nav-h:       44px;
+      --nav-search-w:50px;
+    }
+
+    /* ============================================================
+       RESET
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      background: var(--clr-bg);
+      font-family: 'Poppins', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      color: var(--clr-dark);
+    }
+
+    img   { display: block; max-width: 100%; }
+    a     { cursor: pointer; text-decoration: none; color: inherit; }
+    button {
+      cursor: pointer; border: none; background: none;
+      font-family: inherit; color: inherit;
+    }
+
+    /* ============================================================
+       PAGE SHELL
+    ============================================================ */
+    .page {
+      position: relative;
+      max-width: var(--page-w);
+      margin: 0 auto;
+      background: var(--clr-bg);
+      overflow-x: hidden;
+      /* bottom padding so last cards aren't hidden behind sticky nav */
+      padding-bottom: 140px;
+    }
+
+    /* ============================================================
+       HERO GRADIENT  (top 184 px)
+    ============================================================ */
+    .hero-gradient {
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 184px;
+      background: linear-gradient(
+        to bottom,
+        var(--clr-accent) 22.022%,
+        var(--clr-bg)     79.608%
+      );
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* ============================================================
+       SEARCH BAR  — top: 45px, left: 32px, w: 327px, h: 21px
+    ============================================================ */
+    .search {
+      position: relative;
+      z-index: 10;
+      margin: 45px var(--page-pad-x) 0;
+    }
+    .search__pill {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      height: var(--search-h);
+      background: var(--clr-bg);
+      border-radius: var(--r-pill);
+      padding: 0 8px;
+    }
+    .search__icon {
+      width: 14px;
+      height: 14px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    /* ============================================================
+       FILTER BAR  — top: 81px, same horizontal padding
+       Pills: h=21px, rounded-[150px], bg=#fefaf1
+       Icon pill: w=30px  |  Categorías: w=80px  |  Tamaño: w=68px
+                  Marca: w=57px  |  Color: w=53px
+    ============================================================ */
+    .filter-bar {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      margin-top: 15px;               /* 81 - 45(search top) - 21(search h) = 15 */
+      padding: 0 var(--page-pad-x);
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
+
+    /* shared pill base */
+    .filter-bar__pill {
+      flex-shrink: 0;
+      height: var(--filter-h);
+      background: var(--clr-bg);
+      border-radius: var(--r-pill);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      padding: 0 7px;
+      font-size: var(--fs-10);
+      font-weight: var(--fw-reg);
+      color: var(--clr-dark);
+      line-height: 1;
+      white-space: nowrap;
+    }
+    /* icon-only pill */
+    .filter-bar__pill--icon { width: 30px; padding: 0; }
+    .filter-bar__pill img  { width: 14px; height: 14px; object-fit: contain; }
+    /* chevron inside text pills */
+    .filter-bar__chevron { width: 9px; height: 5px; object-fit: contain; }
+
+    /* ============================================================
+       BEER MINI-CAROUSEL  — top: 120px, left: 31px, gap: 15px
+       Each tile: w=64.6px h=83.4px bg=#ffebb0 r=20px
+       Bottle img inside: ~w=21px, positioned center-bottom
+    ============================================================ */
+    .mini-carousel {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      gap: 15px;
+      margin-top: 10px;               /* ~120 - 81(filter top) - 21(filter h) - 8 */
+      padding: 0 var(--page-pad-x);
+      overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
+    }
+    .mini-carousel::-webkit-scrollbar { display: none; }
+
+    .mini-carousel__tile {
+      position: relative;
+      flex-shrink: 0;
+      width:  var(--mini-w);
+      height: var(--mini-h);
+      background: var(--clr-accent-pale);
+      border-radius: var(--r-card);
+      overflow: hidden;
+    }
+    .mini-carousel__tile img {
+      position: absolute;
+      bottom: 5px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 21px;
+      height: auto;
+      object-fit: contain;
+    }
+
+    /* ============================================================
+       SECTION LABEL  "Cerveza artesanal"
+       top: 221px  left: 31px  10px Regular
+    ============================================================ */
+    .section-label {
+      position: relative;
+      z-index: 10;
+      margin: 16px var(--page-pad-x) 0;
+      font-size: var(--fs-10);
+      font-weight: var(--fw-reg);
+      color: var(--clr-dark);
+      line-height: normal;
+    }
+
+    /* ============================================================
+       PRODUCT GRID
+       2 columns, gap=14px, left col starts at ~40px, right at ~214px
+       Card w=152px (total col w)
+    ============================================================ */
+    .product-grid {
+      position: relative;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 14px;
+      margin-top: 10px;
+      padding: 0 var(--page-pad-x);
+    }
+
+    /* ============================================================
+       PRODUCT CARD
+       h=219px total  bg=#ffbf00  r=20px
+       Image area: h≈165px (card top portion)
+       Body text + cta: bottom portion
+    ============================================================ */
+    .product-card {
+      position: relative;
+      background: var(--clr-accent);
+      border-radius: var(--r-card);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* --- image area --- */
+    .product-card__media {
+      position: relative;
+      width: 100%;
+      height: var(--card-img-h);
+      overflow: hidden;
+      border-radius: var(--r-card) var(--r-card) 0 0;
+      flex-shrink: 0;
+    }
+    .product-card__media img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center center;
+      pointer-events: none;
+    }
+
+    /* --- "Producto nuevo" badge
+           bg=#8a38f5  h=17px  r: tl=10 tr=20 br=20 bl=0
+           absolutely positioned at top-left of image --- */
+    .product-card__badge {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 4;
+      height: 17px;
+      padding: 0 5px;
+      background: var(--clr-purple);
+      border-radius: 0 20px 20px 10px;
+      display: flex;
+      align-items: center;
+    }
+    .product-card__badge span {
+      font-size: var(--fs-10);
+      font-weight: var(--fw-bold);
+      color: var(--clr-bg);
+      white-space: nowrap;
+      line-height: 1;
+    }
+
+    /* --- heart button
+           bg=#2f211d  w=21 h=18  r=43px  top=8 right=8 --- */
+    .product-card__heart {
+      position: absolute;
+      top: 8px;
+      right: 8px;
+      z-index: 5;
+      width:  var(--heart-w);
+      height: var(--heart-h);
+      background: var(--clr-dark);
+      border-radius: var(--r-btn);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 4px 5px;
+      transition: background 0.2s;
+    }
+    .product-card__heart img {
+      width: 11px;
+      height: 10px;
+      object-fit: contain;
+    }
+    .product-card__heart[aria-pressed="true"] {
+      background: #8a38f5 !important;
+    }
+
+    /* --- card body (name, price, cta) --- */
+    .product-card__body {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 4px 4px 10px 4px;
+      gap: 2px;
+    }
+    .product-card__name {
+      font-size: var(--fs-8);
+      font-weight: var(--fw-reg);
+      color: var(--clr-dark);
+      line-height: normal;
+      padding-left: 4px;
+    }
+    .product-card__price {
+      font-size: var(--fs-10);
+      font-weight: var(--fw-bold);
+      color: var(--clr-dark);
+      line-height: normal;
+      padding-left: 4px;
+      margin-bottom: 6px;
+    }
+
+    /* --- "Agregar al carrito" button
+           bg=#fefaf1  h=21px  w=110px  r=150px  10px Regular
+           centered within the card --- */
+    .product-card__cta {
+      display: flex;
+      justify-content: center;
+    }
+    .product-card__cta-btn {
+      width:  var(--cart-btn-w);
+      height: var(--cart-btn-h);
+      background: var(--clr-bg);
+      border-radius: var(--r-pill);
+      font-size: var(--fs-10);
+      font-weight: var(--fw-reg);
+      color: var(--clr-dark);
+      text-align: center;
+      line-height: 1;
+      transition: background 0.15s;
+      white-space: nowrap;
+    }
+    .product-card__cta-btn:hover  { background: #f0ece3; }
+    .product-card__cta-btn:active { background: #e5e1d8; }
+    .product-card__cta-btn.added  { background: #d8f5d8; }
+
+    /* ============================================================
+       STICKY BOTTOM NAV
+       bg=#fefaf1  r=20px top  h=118px total
+       Inner: main pill (w=261 h=44 r=43 bg=#ffbf00) + search (w=50 h=44)
+       Active icon has dark bg pill w=45.78 h=40.7 r=43px
+    ============================================================ */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: var(--page-w);
+      height: 118px;
+      background: #fefaf1;
+      border-radius: var(--r-card) var(--r-card) 0 0;
+      box-shadow: 0 -3px 20px rgba(0,0,0,0.07);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 12px;
+    }
+
+    /* Main yellow pill */
+    .bottom-nav__main {
+      flex: 1;
+      height: var(--nav-h);
+      background: var(--clr-accent);
+      border-radius: var(--r-btn);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 6px;
+    }
+
+    /* Each icon button inside the pill */
+    .bottom-nav__icon {
+      width: 38px;
+      height: 38px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: var(--r-btn);
+      transition: opacity 0.15s;
+    }
+    .bottom-nav__icon:hover { opacity: 0.7; }
+    .bottom-nav__icon img  { width: 24px; height: auto; object-fit: contain; }
+
+    /* Active icon: dark pill behind it */
+    .bottom-nav__icon--active {
+      background: var(--clr-dark);
+      width:  45.78px;
+      height: 40.7px;
+    }
+    .bottom-nav__icon--active img { width: 26px; }
+
+    /* Separate search pill */
+    .bottom-nav__search {
+      flex-shrink: 0;
+      width:  var(--nav-search-w);
+      height: var(--nav-h);
+      background: var(--clr-accent);
+      border-radius: var(--r-btn);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.15s;
+    }
+    .bottom-nav__search:hover { opacity: 0.8; }
+    .bottom-nav__search img   { width: 22px; height: 22px; object-fit: contain; }
+
+    /* ============================================================
+       RESPONSIVE — TABLET  (≤ 1024px)
+    ============================================================ */
+    @media (max-width: 1024px) {
+      .page, .bottom-nav { max-width: 100%; }
+    }
+
+    /* ============================================================
+       RESPONSIVE — MOBILE  (≤ 768px)
+    ============================================================ */
+    @media (max-width: 768px) {
+      :root {
+        --page-pad-x: 20px;
+        --card-img-h: 140px;
+        --mini-w: 58px;
+        --mini-h: 75px;
+      }
+      .product-card__price { font-size: 9px; }
+    }
+
+    @media (max-width: 420px) {
+      :root { --page-pad-x: 14px; }
+      .product-card__cta-btn { width: 95px; font-size: 8px; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page" role="main">
+
+  <!-- ╔══════════════════════════════╗
+       ║  BACKGROUND GRADIENT         ║
+       ╚══════════════════════════════╝ -->
+  <div class="hero-gradient" aria-hidden="true"></div>
+
+  <!-- ╔══════════════════════════════╗
+       ║  HEADER: SEARCH BAR          ║
+       ╚══════════════════════════════╝ -->
+  <header>
+    <div class="search" role="search" aria-label="Buscar productos">
+      <div class="search__pill">
+        <img
+          class="search__icon"
+          src="https://www.figma.com/api/mcp/asset/b77c7919-0912-497b-9249-72941eb158e2"
+          alt="Buscar"
+        />
+      </div>
+    </div>
+  </header>
+
+  <!-- ╔══════════════════════════════╗
+       ║  FILTER BAR                  ║
+       ╚══════════════════════════════╝ -->
+  <nav class="filter-bar" aria-label="Filtros">
+
+    <!-- filter icon pill -->
+    <button class="filter-bar__pill filter-bar__pill--icon" aria-label="Abrir filtros">
+      <img
+        src="https://www.figma.com/api/mcp/asset/d2c22ef9-de48-4954-a552-9879a14c58f7"
+        alt="Filtros"
+      />
+    </button>
+
+    <!-- Categorías -->
+    <button class="filter-bar__pill" aria-haspopup="listbox" aria-label="Filtrar por categoría">
+      Categorías
+      <img
+        class="filter-bar__chevron"
+        src="Imagenes/FlechaIcono.svg"
+        alt=""
+        aria-hidden="true"
+      />
+    </button>
+
+    <!-- Tamaño -->
+    <button class="filter-bar__pill" aria-haspopup="listbox" aria-label="Filtrar por tamaño">
+      Tamaño
+      <img
+        class="filter-bar__chevron"
+        src="Imagenes/FlechaIcono.svg"
+        alt=""
+        aria-hidden="true"
+      />
+    </button>
+
+    <!-- Marca -->
+    <button class="filter-bar__pill" aria-haspopup="listbox" aria-label="Filtrar por marca">
+      Marca
+      <img
+        class="filter-bar__chevron"
+        src="Imagenes/FlechaIcono.svg"
+        alt=""
+        aria-hidden="true"
+      />
+    </button>
+
+    <!-- Color -->
+    <button class="filter-bar__pill" aria-haspopup="listbox" aria-label="Filtrar por color">
+      Color
+      <img
+        class="filter-bar__chevron"
+        src="Imagenes/FlechaIcono.svg"
+        alt=""
+        aria-hidden="true"
+      />
+    </button>
+
+  </nav>
+
+  <!-- ╔══════════════════════════════╗
+       ║  BEER MINI-CAROUSEL           ║
+       ╚══════════════════════════════╝ -->
+  <section class="mini-carousel" aria-label="Selección de cervezas">
+
+    <div class="mini-carousel__tile">
+      <img src="https://www.figma.com/api/mcp/asset/98361bf9-225e-4c9d-b6db-a613cb6d1a3e" alt="Cerveza Churuka" />
+    </div>
+    <div class="mini-carousel__tile">
+      <img src="https://www.figma.com/api/mcp/asset/f53a6588-e2ae-4e81-b191-6767fd071c1f" alt="Cerveza segunda" />
+    </div>
+    <div class="mini-carousel__tile">
+      <img src="https://www.figma.com/api/mcp/asset/62fb72e3-cd96-48b8-b2f3-3cea27d749f8" alt="Cerveza Chami" />
+    </div>
+    <div class="mini-carousel__tile">
+      <img src="https://www.figma.com/api/mcp/asset/65b5e14c-40fe-4b3f-9bbe-ed8be0d29d78" alt="Cerveza Amazona" />
+    </div>
+    <div class="mini-carousel__tile">
+      <img src="https://www.figma.com/api/mcp/asset/c1fa8965-7cf1-4e4c-8558-8e216e228138" alt="Cerveza Coromoro" />
+    </div>
+    <div class="mini-carousel__tile">
+      <img src="https://www.figma.com/api/mcp/asset/23b4de43-a34b-4da0-8021-abcd0cb64175" alt="Cerveza Niebla" />
+    </div>
+
+  </section>
+
+  <!-- ╔══════════════════════════════╗
+       ║  SECTION LABEL               ║
+       ╚══════════════════════════════╝ -->
+  <p class="section-label">Cerveza artesanal</p>
+
+  <!-- ╔══════════════════════════════╗
+       ║  PRODUCT GRID (6 cards)      ║
+       ╚══════════════════════════════╝ -->
+  <section class="product-grid" aria-label="Productos">
+
+    <!-- ── CARD 1 · Cacaotera  ─ has "Producto nuevo" badge ── -->
+    <article class="product-card">
+      <div class="product-card__media">
+          <a href="CategoriasCacaotera.html">
+    <img
+      src="https://www.figma.com/api/mcp/asset/e5051108-9c44-4ac9-9fd3-7c2180b7f529"
+      alt="Cerveza artesanal Cacaotera"
+    />
+  </a>
+        <!-- badge -->
+        <div class="product-card__badge" role="note">
+          <span>Producto nuevo</span>
+        </div>
+      </div>
+      <!-- heart -->
+      <button
+        class="product-card__heart"
+        aria-label="Agregar a favoritos"
+        aria-pressed="false"
+      >
+        <img
+          src="https://www.figma.com/api/mcp/asset/7a8965d1-2156-4686-8b59-4580599f54cb"
+          alt=""
+          aria-hidden="true"
+        />
+      </button>
+      <div class="product-card__body">
+        <p class="product-card__name">Cerveza artesanal Cacaotera</p>
+        <p class="product-card__price">$ 14.000 – $ 264.000</p>
+        <div class="product-card__cta">
+          <button class="product-card__cta-btn" aria-label="Agregar Cacaotera al carrito">
+            Agregar al carrito
+          </button>
+        </div>
+      </div>
+    </article>
+
+    <!-- ── CARD 2 · Churuka ── -->
+    <article class="product-card">
+      <div class="product-card__media">
+        <a href="CategoriasChuruka.html">
+      <img
+          src="https://www.figma.com/api/mcp/asset/70a42548-3bc1-457e-9958-a1eda4d3798b"
+          alt="Cerveza artesanal Churuka"
+        />
+        </a>
+      </div>
+      <button
+        class="product-card__heart"
+        aria-label="Agregar a favoritos"
+        aria-pressed="false"
+      >
+        <img
+          src="https://www.figma.com/api/mcp/asset/7a8965d1-2156-4686-8b59-4580599f54cb"
+          alt=""
+          aria-hidden="true"
+        />
+      </button>
+      <div class="product-card__body">
+        <p class="product-card__name">Cerveza artesanal Churuka</p>
+        <p class="product-card__price">$ 14.000 – $ 264.000</p>
+        <div class="product-card__cta">
+          <button class="product-card__cta-btn" aria-label="Agregar Churuka al carrito">
+            Agregar al carrito
+          </button>
+        </div>
+      </div>
+    </article>
+
+    <!-- ── CARD 3 · Niebla ── -->
+    <article class="product-card">
+      <div class="product-card__media">
+        <a href="CategoriasNiebla.html">
+        <img
+          src="https://www.figma.com/api/mcp/asset/1ee09508-8586-48ca-99c1-caaddde00f12"
+          alt="Cerveza artesanal Niebla"
+        />
+        </a>
+      </div>
+      <button
+        class="product-card__heart"
+        aria-label="Agregar a favoritos"
+        aria-pressed="false"
+      >
+        <img
+          src="https://www.figma.com/api/mcp/asset/7a8965d1-2156-4686-8b59-4580599f54cb"
+          alt=""
+          aria-hidden="true"
+        />
+      </button>
+      <div class="product-card__body">
+        <p class="product-card__name">Cerveza artesanal Niebla</p>
+        <p class="product-card__price">$ 14.000 – $ 264.000</p>
+        <div class="product-card__cta">
+          <button class="product-card__cta-btn" aria-label="Agregar Niebla al carrito">
+            Agregar al carrito
+          </button>
+        </div>
+      </div>
+    </article>
+
+    <!-- ── CARD 4 · Chami ── -->
+    <article class="product-card">
+      <div class="product-card__media">
+        <a href="CategoriasChami.html">
+        <img
+          src="https://www.figma.com/api/mcp/asset/54f0e383-5b62-4fc1-a2e4-d45d6a0e8707"
+          alt="Cerveza artesanal Chami"
+        />
+        </a>
+      </div>
+      <button
+        class="product-card__heart"
+        aria-label="Agregar a favoritos"
+        aria-pressed="false"
+      >
+        <img
+          src="https://www.figma.com/api/mcp/asset/7a8965d1-2156-4686-8b59-4580599f54cb"
+          alt=""
+          aria-hidden="true"
+        />
+      </button>
+      <div class="product-card__body">
+        <p class="product-card__name">Cerveza artesanal Chami</p>
+        <p class="product-card__price">$ 14.000 – $ 264.000</p>
+        <div class="product-card__cta">
+          <button class="product-card__cta-btn" aria-label="Agregar Chami al carrito">
+            Agregar al carrito
+          </button>
+        </div>
+      </div>
+    </article>
+
+    <!-- ── CARD 5 · Amazona  (No disponible) ── -->
+    <article class="product-card">
+      <div class="product-card__media">
+        <a href="CategoriasAmazonaND.html">
+        <img
+          src="https://www.figma.com/api/mcp/asset/3df9c48b-6d9f-4690-9332-1e1682019f22"
+          alt="Cerveza artesanal Amazona"
+        />
+        </a>
+      </div>
+      <button
+        class="product-card__heart"
+        aria-label="Agregar a favoritos"
+        aria-pressed="false"
+      >
+        <img
+          src="https://www.figma.com/api/mcp/asset/7a8965d1-2156-4686-8b59-4580599f54cb"
+          alt=""
+          aria-hidden="true"
+        />
+      </button>
+      <div class="product-card__body">
+        <p class="product-card__name">Cerveza artesanal Amazona</p>
+        <p class="product-card__price">No disponible</p>
+        <div class="product-card__cta">
+          <button class="product-card__cta-btn" aria-label="Agregar Amazona al carrito" disabled>
+            Agregar al carrito
+          </button>
+        </div>
+      </div>
+    </article>
+
+    <!-- ── CARD 6 · Coromoro  (No disponible) ── -->
+    <article class="product-card">
+      <div class="product-card__media">
+        <a href="CategoriasCoromoroND.html">
+        <img
+          src="https://www.figma.com/api/mcp/asset/46ed30cd-a2cb-4a92-95f4-03515f525452"
+          alt="Cerveza artesanal Coromoro"
+        />
+        </a>
+      </div>
+      <button
+        class="product-card__heart"
+        aria-label="Agregar a favoritos"
+        aria-pressed="false"
+      >
+        <img
+          src="https://www.figma.com/api/mcp/asset/7a8965d1-2156-4686-8b59-4580599f54cb"
+          alt=""
+          aria-hidden="true"
+        />
+      </button>
+      <div class="product-card__body">
+        <p class="product-card__name">Cerveza artesanal Coromoro</p>
+        <p class="product-card__price">No disponible</p>
+        <div class="product-card__cta">
+          <button class="product-card__cta-btn" aria-label="Agregar Coromoro al carrito" disabled>
+            Agregar al carrito
+          </button>
+        </div>
+      </div>
+    </article>
+
+  </section><!-- /.product-grid -->
+
+  <!-- ╔══════════════════════════════╗
+       ║  STICKY BOTTOM NAVIGATION    ║
+       ╚══════════════════════════════╝ -->
+  <nav class="bottom-nav" aria-label="Navegación principal">
+
+    <!-- Main yellow pill (4 icons) -->
+    <div class="bottom-nav__main" role="list">
+
+      <!-- Home -->
+      <a
+        class="bottom-nav__icon"
+        href="Home.html"
+        role="listitem"
+        aria-label="Inicio"
+      >
+        <img
+          src="Imagenes/HomeIcono.svg"
+          alt="Inicio"
+        />
+      </a>
+
+      <!-- Categorías (ACTIVE — dark pill) -->
+      <button
+        class="bottom-nav__icon bottom-nav__icon--active"
+        role="listitem"
+        aria-label="Categorías"
+        aria-current="page"
+      >
+        <img
+          src="Imagenes/CatalogoIconoAmarillo.svg"
+          alt="Categorías"
+        />
+      </button>
+
+      <!-- Carrito -->
+      <a
+        class="bottom-nav__icon"
+        href="carrito.html"
+        role="listitem"
+        aria-label="Carrito de compras"
+      >
+        <img
+          src="Imagenes/CarritoIcono.svg"
+          alt="Carrito"
+        />
+      </a>
+
+      <!-- Menú / Hamburger -->
+      <a
+        class="bottom-nav__icon"
+        href="usuario.html"
+        role="listitem"
+        aria-label="Menú"
+      >
+        <img
+          src="Imagenes/UsuarioIcono.svg"
+          alt="Menú"
+        />
+      </a>
+
+    </div><!-- /.bottom-nav__main -->
+
+    <!-- Search pill -->
+    <button class="bottom-nav__search" aria-label="Buscar">
+      <img
+        src="Imagenes/BuscarIcono.svg"
+        alt="Buscar"
+      />
+    </button>
+
+  </nav><!-- /.bottom-nav -->
+
+</div><!-- /.page -->
+
+<!-- ============================================================
+     JAVASCRIPT — interactions only, no DOM scaffolding
+============================================================ -->
+<script>
+  /* ── 1. Wheel → horizontal scroll for carousels / filter bar ── */
+  ['mini-carousel', 'filter-bar'].forEach(cls => {
+    const el = document.querySelector('.' + cls);
+    if (!el) return;
+    el.addEventListener('wheel', e => {
+      if (Math.abs(e.deltaY) < Math.abs(e.deltaX)) return; // native h-scroll in play
+      e.preventDefault();
+      el.scrollLeft += e.deltaY * 0.8;
+    }, { passive: false });
+  });
+
+  /* ── 2. Heart / wishlist toggle ── */
+  document.querySelectorAll('.product-card__heart').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const pressed = btn.getAttribute('aria-pressed') === 'true';
+      btn.setAttribute('aria-pressed', String(!pressed));
+      // bg colour handled via CSS [aria-pressed="true"] rule
+    });
+  });
+
+  /* ── 3. Add-to-cart micro-interaction ── */
+  document.querySelectorAll('.product-card__cta-btn:not(:disabled)').forEach(btn => {
+    btn.addEventListener('click', () => {
+      if (btn.classList.contains('added')) return;
+      const original = btn.textContent.trim();
+      btn.classList.add('added');
+      btn.textContent = '✓ Añadido';
+      setTimeout(() => {
+        btn.classList.remove('added');
+        btn.textContent = original;
+      }, 1800);
+    });
+  });
+</script>
+
+</body>
+</html>

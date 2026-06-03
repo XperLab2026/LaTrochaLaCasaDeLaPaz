@@ -1,0 +1,788 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carrito – La Trocha</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;700&display=swap" rel="stylesheet" />
+
+  <style>
+    /* ============================================================
+       DESIGN TOKENS  — extracted 1:1 from Figma node 51:822
+    ============================================================ */
+    :root {
+      /* Colours */
+      --clr-bg:          #fefaf1;
+      --clr-accent:      #ffbf00;
+      --clr-dark:        #2f211d;
+      --clr-white:       #ffffff;
+
+      /* Typography */
+      --fs-8:   8px;
+      --fs-10: 10px;
+      --fw-reg:  400;
+      --fw-bold: 700;
+      --lh-norm: normal;
+
+      /* Layout */
+      --page-w:     390px;
+      --page-pad-x: 31px;
+
+      /* Radii */
+      --r-pill: 150px;
+      --r-card:  20px;
+      --r-btn:   43px;
+
+      /* Cart card */
+      --card-h:       160px;   /* from Figma: h=160 */
+      --card-gap:      18px;   /* 306-124-160 = 22 → visual gap */
+      --card-img-w:   137px;   /* mask group width */
+      --card-img-h:   143px;   /* mask group height */
+
+      /* "Unidad" pill */
+      --unit-w:  63px;
+      --unit-h:  21px;
+
+      /* Bottom nav */
+      --nav-outer-h: 118px;
+      --nav-pill-h:   44px;
+      --nav-pill-w:  261px;
+      --nav-search-w: 50px;
+      --nav-active-w: 45.78px;
+      --nav-active-h: 40.7px;
+    }
+
+    /* ============================================================
+       RESET
+    ============================================================ */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body {
+      background: var(--clr-bg);
+      font-family: 'Poppins', sans-serif;
+      -webkit-font-smoothing: antialiased;
+      color: var(--clr-dark);
+    }
+
+    img     { display: block; }
+    a       { cursor: pointer; text-decoration: none; color: inherit; }
+    button  { cursor: pointer; border: none; background: none; font-family: inherit; color: inherit; }
+
+    /* ============================================================
+       PAGE SHELL
+       Canvas = 390 × 933 px in Figma; nav is fixed, so we need
+       bottom padding to prevent last card hiding behind nav.
+    ============================================================ */
+    .page {
+      position: relative;
+      max-width: var(--page-w);
+      margin: 0 auto;
+      background: var(--clr-bg);
+      overflow-x: hidden;
+      /* extra space under last card (670 + 160 + 22 gap + 118 nav) */
+      padding-bottom: 150px;
+      min-height: 100svh;
+    }
+
+    /* ============================================================
+       HERO GRADIENT  (0 → 184 px)
+       from #ffbf00 at 22.022% → #fefaf1 at 79.608%
+    ============================================================ */
+    .hero-gradient {
+      position: absolute;
+      inset: 0 0 auto 0;
+      height: 184px;
+      background: linear-gradient(
+        to bottom,
+        #ffbf00 22.022%,
+        #fefaf1 79.608%
+      );
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ============================================================
+       SEARCH BAR  — top:45  left:32  w:327  h:21
+    ============================================================ */
+    .search {
+      position: relative;
+      z-index: 10;
+      margin: 45px var(--page-pad-x) 0;
+    }
+
+    .search__pill {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      height: 21px;
+      width: 327px;
+      max-width: 100%;
+      background: var(--clr-bg);
+      border-radius: var(--r-pill);
+      padding: 0 8px;
+    }
+
+    .search__icon {
+      width: 14px;
+      height: 12px;
+      object-fit: contain;
+    }
+
+    /* ============================================================
+       LOCATION ROW  — top:78  left:45
+       Pin icon: left:31  top:78  w:8  h:11
+       Text: left:45  top:78  10px Regular
+    ============================================================ */
+    .location {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 12px;        /* 78 - 45(search top) - 21(search h) = 12 */
+      padding-left: var(--page-pad-x);
+    }
+
+    .location__pin {
+      width: 8px;
+      height: 11px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .location__text {
+      font-size: var(--fs-10);
+      font-weight: var(--fw-reg);
+      color: var(--clr-dark);
+      line-height: var(--lh-norm);
+    }
+
+    /* ============================================================
+       CART LIST
+       First card top: 124px (124 - 78 - 15 - ~12 ≈ internal margin)
+       Cards are stacked with a gap of 22px between them.
+       Card: w=328  h=160  r=20  bg=#ffbf00
+    ============================================================ */
+    .cart-list {
+      position: relative;
+      z-index: 10;
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+      /* top of first card is 124px from page top */
+      margin-top: 19px;         /* 124 - 78 - 15(loc text h) - 12(loc margin) = 19 */
+      padding: 0 var(--page-pad-x);
+    }
+
+    /* ============================================================
+       CART CARD
+       Each card is a horizontal row:
+         Left: product image (masked, w=137 h=143 inside a 160-tall card)
+         Right: name + unit selector + quantity stepper + price
+    ============================================================ */
+    .cart-card {
+      position: relative;
+      width: 328px;
+      margin: 0 auto;
+      max-width: 328px;
+      height: var(--card-h);
+      background: var(--clr-accent);
+      border-radius: var(--r-card);
+      overflow: hidden;
+      display: flex;
+      align-items: stretch;
+    }
+
+    /* ── image column ──
+       In Figma: the mask group x=39, relative to page.
+       In the card (card left=31), the image left offset is 39-31 = 8px.
+       Image extends above and below the card (mask group h=143 inside card h=160,
+       positioned so top of mask = 131-124 = 7px below card top → centred with 8.5px top offset).
+    */
+    .cart-card__media {
+      position: relative;
+      flex-shrink: 0;
+      width: var(--card-img-w);   /* 137px */
+      height: 100%;               /* fills 160px card height */
+      overflow: hidden;
+      border-radius: var(--r-card) 0 0 var(--r-card);
+    }
+
+    .cart-card__media img {
+      /* image is taller than the box → show centre */
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 100%;
+      height: 206px;              /* full mask-group height from Figma */
+      object-fit: cover;
+      object-position: center top;
+      pointer-events: none;
+    }
+
+    /* ── info column ── */
+    .cart-card__info {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 22px 12px 18px 14px;
+      gap: 10px;
+    }
+
+    .cart-card__name {
+      font-size: var(--fs-8);
+      font-weight: var(--fw-reg);
+      color: var(--clr-dark);
+      line-height: var(--lh-norm);
+    }
+
+    /* ── quantity row: stepper + unit dropdown ── */
+    .cart-card__controls {
+      margin-top: 30px;
+        justify-content: left;
+        
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    /* Quantity stepper (– N +) */
+    .stepper {
+      display: flex;
+      align-items: center;
+      height: var(--unit-h);
+      background: var(--clr-bg);
+      border-radius: var(--r-pill);
+      overflow: hidden;
+    }
+
+    .stepper__btn {
+      width: 24px;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      font-weight: var(--fw-bold);
+      color: var(--clr-dark);
+      background: none;
+      border: none;
+      cursor: pointer;
+      line-height: 1;
+      padding: 0 4px;
+      transition: background 0.15s;
+      user-select: none;
+    }
+    .stepper__btn:hover  { background: rgba(47,33,29,0.08); }
+    .stepper__btn:active { background: rgba(47,33,29,0.15); }
+
+    .stepper__count {
+      min-width: 22px;
+      text-align: center;
+      font-size: var(--fs-10);
+      font-weight: var(--fw-reg);
+      color: var(--clr-dark);
+      line-height: 1;
+      padding: 0 2px;
+    }
+
+    /* "Unidad" dropdown pill
+       Figma: w=63  h=21  r=150px  bg=#fefaf1  text 10px Regular
+              chevron at x≈233 relative to page (= ~47px from left of pill)
+    */
+    .unit-select {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      height: var(--unit-h);
+      width: var(--unit-w);
+      background: var(--clr-bg);
+      border-radius: var(--r-pill);
+      padding: 0 7px;
+      cursor: pointer;
+      gap: 4px;
+    }
+
+    .unit-select__label {
+      font-size: var(--fs-10);
+      font-weight: var(--fw-reg);
+      color: var(--clr-dark);
+      line-height: var(--lh-norm);
+      white-space: nowrap;
+      flex: 1;
+    }
+
+    .unit-select__chevron {
+      width: 9px;
+      height: 5px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    /* hidden native select for accessibility */
+    .unit-select select {
+      position: absolute;
+      inset: 0;
+      opacity: 0;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+    }
+
+    /* ── price ── */
+    .cart-card__price {
+      font-size: var(--fs-10);
+      font-weight: var(--fw-bold);
+      color: var(--clr-dark);
+      line-height: var(--lh-norm);
+      margin-top: auto;
+    }
+
+    /* ── remove button (×) ── */
+    .cart-card__remove {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(47,33,29,0.12);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: var(--clr-dark);
+      cursor: pointer;
+      border: none;
+      line-height: 1;
+      transition: background 0.15s;
+    }
+    .cart-card__remove:hover { background: rgba(47,33,29,0.22); }
+
+    /* ============================================================
+       STICKY BOTTOM NAV
+       Figma: top=755  h=118  w=390
+       Inner pill: left=32  top=771  w=261  h=44  r=43  bg=#ffbf00
+       Search pill: left=307  top=771  w=50  h=44  r=43  bg=#ffbf00
+       Active icon bg: left=169  top=773  w=45.78  h=40.7  r=43 bg=#2f211d
+       Icon positions (all inside the 261px pill):
+         Home:      left=66    (vector icon)
+         Categorías:left=124.7 (Group 21)
+         Cart:      left=169   ACTIVE dark pill → left=177.87 (Group 18)
+         Menú:      left=235   (Group 19)
+    ============================================================ */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 100%;
+      max-width: var(--page-w);
+      height: var(--nav-outer-h);
+      background: var(--clr-bg);
+      border-radius: var(--r-card) var(--r-card) 0 0;
+      box-shadow: 0 -3px 20px rgba(0,0,0,0.07);
+      z-index: 300;
+      display: flex;
+      align-items: center;
+      padding: 0 32px;
+      gap: 12px;
+    }
+
+    /* main yellow pill */
+    .bottom-nav__main {
+      flex: 1;
+      height: var(--nav-pill-h);
+      background: var(--clr-accent);
+      border-radius: var(--r-btn);
+      display: flex;
+      align-items: center;
+      justify-content: space-around;
+      padding: 0 6px;
+    }
+
+    /* every icon inside the pill */
+    .bottom-nav__icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 38px;
+      height: 38px;
+      border-radius: var(--r-btn);
+      cursor: pointer;
+      transition: opacity 0.15s;
+      text-decoration: none;
+    }
+    .bottom-nav__icon:hover { opacity: 0.7; }
+    .bottom-nav__icon img  { width: 24px; height: auto; object-fit: contain; }
+
+    /* active (cart) icon — dark oval behind it */
+    .bottom-nav__icon--active {
+      background: var(--clr-dark);
+      width:  var(--nav-active-w);
+      height: var(--nav-active-h);
+    }
+    .bottom-nav__icon--active img { width: 26px; }
+
+    /* search pill */
+    .bottom-nav__search {
+      flex-shrink: 0;
+      width:  var(--nav-search-w);
+      height: var(--nav-pill-h);
+      background: var(--clr-accent);
+      border-radius: var(--r-btn);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: none;
+      cursor: pointer;
+      transition: opacity 0.15s;
+    }
+    .bottom-nav__search:hover { opacity: 0.8; }
+    .bottom-nav__search img   { width: 22px; height: 22px; object-fit: contain; }
+
+    /* ============================================================
+       RESPONSIVE — TABLET  (≤ 1024px)
+    ============================================================ */
+    @media (max-width: 1024px) {
+      .page, .bottom-nav { max-width: 100%; }
+      .search__pill { width: 100%; }
+    }
+
+    /* ============================================================
+       RESPONSIVE — MOBILE  (≤ 768px)
+    ============================================================ */
+    @media (max-width: 768px) {
+      :root {
+        --page-pad-x: 20px;
+        --card-h:     150px;
+        --card-img-w: 120px;
+      }
+      .cart-card__info { padding: 14px 10px 12px 12px; }
+    }
+
+    @media (max-width: 420px) {
+      :root {
+        --page-pad-x: 14px;
+        --card-img-w: 110px;
+      }
+    }
+  </style>
+</head>
+<body>
+
+<div class="page">
+
+  <!-- ══════════════════════════════════
+       BACKGROUND GRADIENT
+  ══════════════════════════════════ -->
+  <div class="hero-gradient" aria-hidden="true"></div>
+
+  <!-- ══════════════════════════════════
+       HEADER: SEARCH + LOCATION
+  ══════════════════════════════════ -->
+  <header>
+    <!-- Search bar — top:45 left:32 w:327 h:21 -->
+    <div class="search" role="search" aria-label="Buscar productos">
+      <div class="search__pill">
+        <img
+          class="search__icon"
+          src="https://www.figma.com/api/mcp/asset/33e6fb90-f302-4b61-b4ee-ccd3af5048f8"
+          alt="Buscar"
+        />
+      </div>
+    </div>
+
+    <!-- Location row — top:78 -->
+    <div class="location">
+      <img
+        class="location__pin"
+        src="https://www.figma.com/api/mcp/asset/3600e4c2-a905-4d73-b709-4e9869729d5d"
+        alt="Ubicación"
+      />
+      <span class="location__text">Kr 13 # 36-37</span>
+    </div>
+  </header>
+
+  <!-- ══════════════════════════════════
+       MAIN: CART LIST
+  ══════════════════════════════════ -->
+  <main>
+    <section class="cart-list" aria-label="Productos en el carrito">
+
+      <!-- ─────────────────────────────
+           CARD 1 · Cacaotera
+           card top=124, img top=131
+      ───────────────────────────────── -->
+      <article class="cart-card" data-product="cacaotera">
+        <div class="cart-card__media">
+          <img
+            src="https://www.figma.com/api/mcp/asset/1ef9a8f3-b8aa-468b-aa7e-ebc0a4fe2a56"
+            alt="Cerveza artesanal Cacaotera"
+          />
+        </div>
+
+        <button class="cart-card__remove" aria-label="Eliminar Cacaotera del carrito">×</button>
+
+        <div class="cart-card__info">
+          <p class="cart-card__name">Cerveza artesanal Cacaotera</p>
+
+          <div class="cart-card__controls">
+            <!-- Quantity stepper -->
+            <div class="stepper" role="group" aria-label="Cantidad">
+              <button class="stepper__btn stepper__decrement" aria-label="Disminuir cantidad">−</button>
+              <span class="stepper__count" aria-live="polite">1</span>
+              <button class="stepper__btn stepper__increment" aria-label="Aumentar cantidad">+</button>
+            </div>
+
+            <!-- Unidad dropdown — Figma: left=186  top=193  w=63  h=21 -->
+            
+          </div>
+
+          <p class="cart-card__price">$ 14.000</p>
+        </div>
+      </article>
+
+      <!-- ─────────────────────────────
+           CARD 2 · Churuka
+           card top=306, img top=313
+      ───────────────────────────────── -->
+      <article class="cart-card" data-product="churuka">
+        <div class="cart-card__media">
+          <img
+            src="https://www.figma.com/api/mcp/asset/135d53a0-d29b-402b-9cc9-cd4f89af5885"
+            alt="Cerveza artesanal Churuka"
+          />
+        </div>
+
+        <button class="cart-card__remove" aria-label="Eliminar Churuka del carrito">×</button>
+
+        <div class="cart-card__info">
+          <p class="cart-card__name">Cerveza artesanal Churuka</p>
+
+          <div class="cart-card__controls">
+            <div class="stepper" role="group" aria-label="Cantidad">
+              <button class="stepper__btn stepper__decrement" aria-label="Disminuir cantidad">−</button>
+              <span class="stepper__count" aria-live="polite">1</span>
+              <button class="stepper__btn stepper__increment" aria-label="Aumentar cantidad">+</button>
+            </div>
+
+            
+          </div>
+
+          <p class="cart-card__price">$ 14.000</p>
+        </div>
+      </article>
+
+      <!-- ─────────────────────────────
+           CARD 3 · Niebla
+           card top=488, img top=495
+      ───────────────────────────────── -->
+      <article class="cart-card" data-product="niebla">
+        <div class="cart-card__media">
+          <img
+            src="https://www.figma.com/api/mcp/asset/b3d2c7e0-6340-427c-99e9-57037f43f509"
+            alt="Cerveza artesanal Niebla"
+          />
+        </div>
+
+        <button class="cart-card__remove" aria-label="Eliminar Niebla del carrito">×</button>
+
+        <div class="cart-card__info">
+          <p class="cart-card__name">Cerveza artesanal Niebla</p>
+
+          <div class="cart-card__controls">
+            <div class="stepper" role="group" aria-label="Cantidad">
+              <button class="stepper__btn stepper__decrement" aria-label="Disminuir cantidad">−</button>
+              <span class="stepper__count" aria-live="polite">1</span>
+              <button class="stepper__btn stepper__increment" aria-label="Aumentar cantidad">+</button>
+            </div>
+
+            
+          </div>
+
+          <p class="cart-card__price">$ 14.000</p>
+        </div>
+      </article>
+
+      <!-- ─────────────────────────────
+           CARD 4 · Chami
+           card top=670, img top=677
+      ───────────────────────────────── -->
+      <article class="cart-card" data-product="chami">
+        <div class="cart-card__media">
+          <img
+            src="https://www.figma.com/api/mcp/asset/cf6c5e84-bd2b-498d-a159-fca495c428e2"
+            alt="Cerveza artesanal Chami"
+          />
+        </div>
+
+        <button class="cart-card__remove" aria-label="Eliminar Chami del carrito">×</button>
+
+        <div class="cart-card__info">
+          <p class="cart-card__name">Cerveza artesanal Chami</p>
+
+          <div class="cart-card__controls">
+            <div class="stepper" role="group" aria-label="Cantidad">
+              <button class="stepper__btn stepper__decrement" aria-label="Disminuir cantidad">−</button>
+              <span class="stepper__count" aria-live="polite">1</span>
+              <button class="stepper__btn stepper__increment" aria-label="Aumentar cantidad">+</button>
+            </div>
+
+            
+          </div>
+
+          <p class="cart-card__price">$ 14.000</p>
+        </div>
+      </article>
+
+    </section><!-- /.cart-list -->
+  </main>
+
+  <!-- ══════════════════════════════════
+       STICKY BOTTOM NAVIGATION
+       Figma: top=755  h=118  w=390
+       Main pill: left=32 top=771 w=261 h=44 r=43 bg=#ffbf00
+       Search:    left=307 top=771 w=50  h=44 r=43 bg=#ffbf00
+       Active:    left=169 top=773 w=45.78 h=40.7 bg=#2f211d (Cart icon)
+       Icon order inside pill: Home · Categorías · Cart(active) · Menú
+  ══════════════════════════════════ -->
+  <nav class="bottom-nav" aria-label="Navegación principal">
+
+    <!-- Main yellow pill -->
+    <div class="bottom-nav__main" role="list">
+
+      <!-- Home -->
+      <a
+        class="bottom-nav__icon"
+        href="Home.html"
+        role="listitem"
+        aria-label="Inicio"
+      >
+        <img
+          src="Imagenes/HomeIcono.svg"
+          alt="Inicio"
+        />
+      </a>
+
+      <!-- Categorías -->
+      <a
+        class="bottom-nav__icon"
+        href="categorias.html"
+        role="listitem"
+        aria-label="Categorías"
+      >
+        <img
+          src="Imagenes/CatalogoIcono.svg"
+          alt="Categorías"
+        />
+      </a>
+
+      <!-- Cart — ACTIVE (dark oval) -->
+      <button
+        class="bottom-nav__icon bottom-nav__icon--active"
+        role="listitem"
+        aria-label="Carrito de compras"
+        aria-current="page"
+      >
+        <img
+          src="Imagenes/CarritoIconoAmarillo.svg"
+          alt="Carrito"
+        />
+      </button>
+
+      <!-- Menú -->
+      <a
+        class="bottom-nav__icon"
+        href="usuario.html"
+        role="listitem"
+        aria-label="Menú"
+      >
+        <img
+          src="Imagenes/UsuarioIcono.svg"
+          alt="Menú"
+        />
+      </a>
+
+    </div><!-- /.bottom-nav__main -->
+
+    <!-- Search pill -->
+    <button class="bottom-nav__search" aria-label="Buscar">
+      <img
+        src="Imagenes/BuscarIcono.svg"
+        alt="Buscar"
+      />
+    </button>
+
+  </nav><!-- /.bottom-nav -->
+
+</div><!-- /.page -->
+
+<!-- ============================================================
+     JAVASCRIPT — quantity stepper + card removal
+============================================================ -->
+<script>
+  /* ── Quantity stepper ── */
+  document.querySelectorAll('.cart-card').forEach(card => {
+    const dec   = card.querySelector('.stepper__decrement');
+    const inc   = card.querySelector('.stepper__increment');
+    const count = card.querySelector('.stepper__count');
+    const price = card.querySelector('.cart-card__price');
+    const BASE  = 14000;
+
+    const opciones = [
+  { nombre: "1", precio: 14000 },
+  { nombre: "6", precio: 84000 },
+  { nombre: "12", precio: 168000 },
+  { nombre: "Caja x4", precio: 224000 }
+];
+
+let indice = 0;
+
+    function update() {
+      count.textContent = opciones[indice].nombre;
+      price.textContent =
+      '$ ' + opciones[indice].precio.toLocaleString('es-CO');
+}
+
+    inc.addEventListener('click', () => {
+  if (indice < opciones.length - 1) {
+    indice++;
+    update();
+  }
+});
+
+dec.addEventListener('click', () => {
+  if (indice > 0) {
+    indice--;
+    update();
+  }
+});
+
+update();
+});
+
+
+  /* ── Remove card with fade ── */
+  document.querySelectorAll('.cart-card__remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const card = btn.closest('.cart-card');
+      card.style.transition = 'opacity 0.25s, max-height 0.3s 0.2s, margin 0.3s 0.2s';
+      card.style.opacity    = '0';
+      card.style.maxHeight  = card.offsetHeight + 'px';
+      requestAnimationFrame(() => {
+        card.style.maxHeight = '0';
+        card.style.marginBottom = '0';
+      });
+      setTimeout(() => card.remove(), 500);
+    });
+  });
+</script>
+
+</body>
+</html>
