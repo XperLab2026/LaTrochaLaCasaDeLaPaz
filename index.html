@@ -265,22 +265,26 @@
        BOTTOM NAV (Menu)
     =========================== */
     .bottom-nav {
-      position: fixed;
-      bottom: 0;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 100%;
-      max-width: var(--page-w);
-      height: 118px;
-      background:#fefaf1;
-      border-radius: var(--r-card) var(--r-card) 0 0;
-      box-shadow: 0 -3px 20px rgba(0,0,0,0.07);
-      z-index: 9999;
-      display: flex;
-      align-items: center;
-      padding: 0 32px;
-      gap: 12px;
-    }
+  position: fixed;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+
+  width: 100%;
+  max-width: var(--page-width);
+
+  height: 118px;
+  background: #fefaf1;
+  border-radius: var(--radius-card) var(--radius-card) 0 0;
+  box-shadow: 0 -3px 20px rgba(0,0,0,0.07);
+  z-index: 300;
+
+  display: flex;
+  align-items: center;
+  padding: 0 32px;
+  gap: 12px;
+}
+    
 
     .bottom-nav__main {
       background-color: var(--color-accent);
